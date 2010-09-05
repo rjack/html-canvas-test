@@ -1,4 +1,4 @@
-var i,
+var i, j,
 
 	canvas = document.getElementById("canvas"),
 
@@ -18,21 +18,38 @@ var i,
 		return img;
 	},
 
+	rd = image("../img/red-dot-3x3.png"),
+
+	star = function (x, y, dx, dy)
+	{
+		var star = {
+				x: x,
+				y: y,
+				dx: dx,
+				dy: dy,
+				img: image("../img/star-100x100.png"),
+				vxs: function (x, y)
+				{
+					return [
+						{x: this.x + 40,  y: this.y + 0},
+						{x: this.x + 64,  y: this.y + 26},
+						{x: this.x + 99, y: this.y + 23},
+						{x: this.x + 81,  y: this.y + 52},
+						{x: this.x + 95,  y: this.y + 84},
+						{x: this.x + 61,  y: this.y + 76},
+						{x: this.x + 34,  y: this.y + 100},
+						{x: this.x + 31,  y: this.y + 65},
+						{x: this.x + 0,   y: this.y + 47},
+						{x: this.x + 33,  y: this.y + 34}
+					];
+				}
+			};
+		return star;
+	},
+
 	stars = [
-		{
-			x: 150,
-			y: 50,
-			dx: 1,
-			dy: 1,
-			img: image("../img/star-100x100.png")
-		},
-		{
-			x: 350,
-			y: 150,
-			dx: 0,
-			dy: 0,
-			img: image("../img/star-100x100.png")
-		}
+		star(60, 60, 1, 1),
+		star(150, 150, 1, 1)
 	],
 
 	collision = function (objects)
@@ -50,10 +67,14 @@ var i,
 			return "";
 		}
 		return "bounding box collision";
+
+		intersections = 0;
 	},
 
 	draw = function ()
 	{
+		var vxs;
+
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 		if (keypress.left) {
@@ -72,7 +93,13 @@ var i,
 		ctx.fillText(collision(stars), 10, 30);
 
 		for (i = 0; i < stars.length; i++) {
+			ctx.globalCompositeOperation = "xor";
 			ctx.drawImage(stars[i].img, stars[i].x, stars[i].y);
+			ctx.globalCompositeOperation = "source-over";
+			vxs = stars[i].vxs();
+			for (j = 0; j < vxs.length; j++) {
+				ctx.drawImage(rd, vxs[j].x - 1, vxs[j].y - 1);
+			}
 		}
 	},
 
@@ -112,8 +139,7 @@ var i,
 		}
 	};
 
-ctx.globalCompositeOperation = "xor";
-ctx.font = "30px sans-serif";
+ctx.font = "16px sans-serif";
 
 setInterval(draw, 1000 / 30);
 window.addEventListener("keydown", onKeyDown, false);
